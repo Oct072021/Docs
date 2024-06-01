@@ -3,6 +3,12 @@
  */
 const sidebar = {
 	'/zh': [
+    {
+			text: '项目',
+			items: [
+				{ text: 'Link', link: '/zh/show/' },
+			]
+		},
 		{
 			text: '八股文',
 			items: [
@@ -19,7 +25,6 @@ const sidebar = {
  * @type {import('vitepress').DefaultTheme.NavItem[]}
  */
 const nav = [
-	{ text: '指南', link: '/zh/guide/', activeMatch: '^/zh/guide/' },
 	{
 		text: '链接',
 		items: [

@@ -1,86 +1,91 @@
-# 1. 对 JS 垃圾回收机制的理解
+## 1.Vue 生命周期分别做了什么事情
 
-::: info
-原理：找到那些不再继续使用的变量，然后释放其占用的内存。垃圾收集机制会按照固定的时间间隔周期性地执行这一操作
-:::
+|     hooks     |                                                   status                                                   |                        实践                        |
+| :-----------: | :--------------------------------------------------------------------------------------------------------: | :------------------------------------------------: |
+| beforeCreate  |                  实例初始化之后，this 指向创建的实例，此时不能访问到 data、methods 等属性                  |              常用于初始化非响应式变量              |
+|    created    |               实例创建完成，此时可访问 data、method 等属性；不能访问到$el，无法获取组件实例                |        常用于简单的 ajax 请求，页面的初始化        |
+|  beforeMount  |                     在挂载开始之前被调用，进行模版编译，把 template 编译成 render 函数                     |                         --                         |
+|    mounted    |                     实例挂载到 DOM 上，此时可以访问$el、$ref，因此可以获取到 DOM 节点                      |       常用于获取 VNode 信息和操作，ajax 请求       |
+| beforeUpdate  |                                 响应式数据更新时调用，获取的是更新前的 DOM                                 |            手动移除已添加的事件监听器量            |
+|    updated    |                              组件更新后立刻调用，可执行依赖于最新 DOM 的操作                               |    避免在这个钩子函数中操作数据，可能陷入死循环    |
+| beforeDestroy |                      实例销毁之前调用。这一步，实例仍然完全可用，this 仍能获取到实例                       | 常用于销毁定时器、解绑全局事件、销毁插件对象等操作 |
+|   destroyed   | 实例销毁后调用，调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁 |                         --                         |
 
-最常用的跟踪方法是标记清除，当函数执行完后，就会给局部变量打上“离开环境”的标记（除了闭包），在下一次垃圾回收时间到来时就会清除这一块内存，手动将一个有值的变量赋值为 null，也是让这个值离开环境，也可以释放内存
-
-# 2. 事件委托原理
-
-利用事件冒泡，让子元素所执行的事件，让其父元素代替执行
-
-# 3. null 和 undefined 的区别
-
-::: tip
-null 是一个表示"无"的对象，转为数值时为 0；undefined 是一个表示"无"的原始值，转为数值时为 NaN  
-当声明的变量还未被初始化时，变量的默认值为 undefined。 null 用来表示尚未存在的对象  
-:::
-
-**undefined** 表示"缺少值"，就是此处应该有一个值，但是还没有定义
-::: details 典型用法
-（1）变量被声明了，但没有赋值时，就等于 undefined  
-（2）调用函数时，应该提供的参数没有提供，该参数等于 undefined  
-（3）对象没有赋值的属性，该属性的值为 undefined  
-（4）函数没有返回值时，默认返回 undefined
-:::
-**null** 表示"没有对象"，即该处不应该有值
-::: details 典型用法
-（1） 作为函数的参数，表示该函数的参数不是对象  
-（2） 作为对象原型链的终点
-:::
-
-# 4. new 操作符具体做了什么
-
-1、创建一个空对象，并且 this 变量引用该对象，同时还继承了该函数的原型  
-2、属性和方法被加入到 this 引用的对象中  
-3、新创建的对象由 this 所引用，并且最后隐式的返回 this
-
-# 5. 谈谈闭包
-
-首先闭包是函数内部再嵌套一层函数，并且嵌套的函数必须要使用到外层函数定义的变量，当执行外层函数时，闭包形成。
-::: tip 核心作用
-使变量可以保留在内存中，不被释放掉。也因为如此，可能会造成内存泄漏
-:::
-
-# 6. 谈谈 Promise
-
-（1）promise 是为解决异步处理回调地狱问题而产生的  
-（2）有三种状态，pengding、resolve、reject，状态一旦决定就不会改变  
-（3）then 接收 resolve()，catch 接收 reject()
-
-# 7.JS 判断数据类型
-
-::: tip typeof
-能判断出四种，分别是 number，string，boolean，object，剩余的均被检测为 object
-:::
-::: tip instanceof
-判断参照对象的 prototype 属性所指向的对象是否在被行测对象的原型链上
-:::
-::: tip constructor
-针对于 instanceof 的弊端，我们使用 constructor 检测，constructor 是原型对象的属性指向构造函数  
- 这种方式解决了 instanceof 的弊端,可以检测出除了 undefined 和 null 的 9 种类型
-:::
-::: tip Object.prototype.toString.call
-Object.prototype.toString 可以取得对象的内部属性[[class]]，并根据这个内部属性返回诸如"[object Number]"的字符串，那么我们就可以通过 call 获取内部属性[[class]]
-:::
-
-::: info
-This is an info box.
-:::
-
-::: tip
-This is a tip.
-:::
+## 2.keep-alive 及其生命周期
 
 ::: warning
-This is a warning.
+**keep-alive** 是一个抽象组件：它自身不会渲染一个 DOM 元素，也不会出现在父组件链中
+:::
+| hooks | status |  
+| :---: | :----: |
+| activated | 在第一次渲染时调用，以及后续每次激活时调用 |
+| deactivated | 组件停用时调用 |
+
+## 3.v-for 为什么要加上 key
+
+::: warning 提升性能
+&emsp;① Vue 通过 diff 算法去比较 VDom 的变化，而 **key** 则为每个 VNode 添加了**唯一标识**，使得 diff 算法可以更高效的比较 VDom 的变化  
+&emsp;② 如果 v-for 用于渲染组件，不提供 key 的话，每次重新渲染都会创建**新的实例**，并销毁旧的。而新的组件实例不会继承原有的状态，因此会造成组件**内部状态丢失**的问题，如输入框中已输入的内容
+:::
+::: tip 为什么不建议用 index 作为 key
+&emsp;index 有可能会变，起不到**唯一标识**的作用
+
+```js
+const arr = [
+	{ age: 18, name: 'vladimir' },
+	{ age: 19, name: 'screeper' },
+	{ age: 20, name: 'coder' },
+	{ age: 24, name: 'ghost' }
+]
+arr.unshift({ age: 23, name: 'codemaker' })
+```
+
+在数组的头部插入新元素，则原数组的所有 index 值都发生了改变，因此 key 的效果无法达到
 :::
 
-::: danger
-This is a dangerous warning.
-:::
+## 4.谈谈 Vue 响应式 和 双向绑定 的原理
 
-::: details
-This is a details block.
+当数据发生变化时，对应的视图也随之更新  
+:::danger 响应式
+响应式一定是：**数据与函数**的绑定，这里的函数一般指的是用到此数据的**渲染函数**  
+此外，计算属性 computed 也是此原理，利用数据与回调函数进行绑定，实现了**数据之间的关联**，关联的桥梁正是**回调函数**
+:::
+:::danger 双向绑定
+_Vue2_ 基于 **Object.defineProperty**，并结合**发布订阅**模式  
+_Vue3_ 基于 **Proxy**  
+已 Vue2 为例，通过遍历 data 对象的所有属性，使其转化为 **getter 和 setter**  
+在 getter 里进行**依赖收集**，即记录用到此变量的所有函数  
+在 setter 里进行**派发更新**，即运行刚刚记录到的所有渲染函数
+
+```js
+const observe = obj => {
+	for (let key in obj) {
+		let internalValue = obj[key]
+		let funcs = new Set()
+		Object.defineProperty(obj, key, {
+			get: function () {
+				// 依赖收集， 记录：哪个函数用到了此变量
+				window.__func && funcs.add(window.__func)
+				return internalValue
+			},
+			set: function (val) {
+				internalValue = val
+
+				// 派发更新， 运行：执行所有用到此变量的函数
+				funcs.forEach(func => {
+					func()
+				})
+			}
+		})
+	}
+}
+
+// 辅助函数，把函数名记录到全局变量上，方便进行依赖收集
+const autoRun = fn => {
+	window.__func = fn
+	fn()
+	window.__func = null
+}
+```
+
 :::

@@ -70,7 +70,7 @@ Object.prototype.toString 可以取得对象的内部属性[[class]]，并根据
 ::: tip 相同点
 
 1. 都可以描述一个对象或函数
-2. 都允许扩展(extends),interface 使用 extends，type 使用等号（=）
+2. 都允许扩展(extends),interface 使用 extends，type 使用等号（=）  
    :::
 
    ::: tip 不同点
@@ -78,3 +78,40 @@ Object.prototype.toString 可以取得对象的内部属性[[class]]，并根据
 3. type 可以声明基本类型别名，联合类型，元组等，interface 则不能
 4. interface 可以合并（覆写），type 不能
    :::
+
+## 9.call、bind、apply 的作用和区别
+
+::: tip
+
+```js
+fn.apply(this, [args_array])
+fn.call(this, arg1, arg2, ...)
+
+fn.bind(this, arg1, arg2, ...)()
+or
+const newFn = fn.bind(this, arg1, arg2, ...)
+```
+
+&emsp;call 和 apply  
+都可以改变 this 的指向，并且改变后**立即执行**，因此是**临时改变**  
+但传参方式有所不同  
+&emsp;bind  
+bind 的返回值是一个函数，此函数已经改变了 this 指向，因此是**永久更改**  
+不会立即执行，需要手动调用
+:::
+
+## 10.谈谈 ES6 的箭头函数
+
+消除了普通函数的**二义性**
+::: tip 普通函数
+既可以通过 () 执行调用，也可以通过 new 调用  
+因此意义不明，可读性差
+
+this：有自己的 this 指向，指向**调用者**，即**存在原型**
+
+:::
+::: warning 箭头函数
+无法通过 new 调用，只能作为函数**执行调用**，意义明确
+
+this：没有自己的 this，使用的是**父级作用域的 this**，即**不存在原型**
+:::

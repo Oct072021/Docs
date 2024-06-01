@@ -1,2 +1,1 @@
-# Docs
-八股
+# Some Note

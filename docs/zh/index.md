@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: 快速开始
-      link: ./guide/
+      link: ./js/
     - theme: alt
       text: VitePress 指南
       link: https://vitepress.dev

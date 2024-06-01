@@ -4,22 +4,12 @@
 const sidebar = {
 	'/zh': [
 		{
-			text: '指南',
-			items: [{ text: '快速开始', link: '/zh/guide/' }]
-		},
-		{
-			text: '示例',
-			items: [
-				{ text: 'Markdown 拓展', link: '/zh/guide/markdown' },
-				{ text: '资源处理 ', link: '/zh/guide/asset-handling' }
-			]
-		},
-		{
 			text: '八股文',
 			items: [
-				{ text: 'JS', link: '/zh/js/' },
+				{ text: 'JS && TS', link: '/zh/js/' },
 				{ text: 'Vue ', link: '/zh/vue/' },
-				{ text: '原理', link: '/zh/theory/' }
+				{ text: '原理', link: '/zh/theory/' },
+				{ text: '优化手段', link: '/zh/optimization/' }
 			]
 		}
 	]

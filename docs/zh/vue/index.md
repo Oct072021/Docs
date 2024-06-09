@@ -89,3 +89,23 @@ const autoRun = fn => {
 ```
 
 :::
+
+## 5. Proxy 与 defineProperty 的异同？以及 Vue3 为什么要用 Proxy 替代？
+
+_Proxy 和 defineProperty 都是 JavaScript 中用于拦截和改变对象属性行为的工具_
+::: danger Proxy
+Proxy 对象用于创建一个对象的代理，从而实现[_基本操作_](https://tc39.es/ecma262/#sec-object-internal-methods-and-internal-slots)的**拦截和自定义**（如属性查找、赋值、枚举、函数调用等）
+
+<p align="right">----摘自MDN官网</p>
+
+可见，相比于 defineProperty，Proxy 可以拦截所有的基本操作，包括*读取原型*和*数组*的相关处理，即回归到了对象的最初状态  
+因此，在 Proxy 中重新定义对象的基本操作，即可实现 Vue 中响应式的效果（**依赖收集** 和 **派发更新**）
+:::
+
+::: warning defineProperty 是如何处理数组的
+上述提到，defineProperty 其实也是对象的*基本操作*之一，因此当数组发生改变时，Vue 无法监听到，也就无法执行相关的响应式操作
+
+因此，在 Vue2 中，对于 data 中定义的数组，修改其继承关系，在数组对象与数组原型之间加入一层自定义对象，在这层对象中重写了数组的全部方法，以此达到监听的效果  
+**arr(数组对象) -> 自定义对象(隐式原型对象*proto*指向数组的显式原型) -> Array.prototype**
+:::
+由此可见，使用 Proxy 使得 Vue3 的响应式更为完整，功能更为强大

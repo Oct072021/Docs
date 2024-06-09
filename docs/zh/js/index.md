@@ -115,3 +115,92 @@ this：有自己的 this 指向，指向**调用者**，即**存在原型**
 
 this：没有自己的 this，使用的是**父级作用域的 this**，即**不存在原型**
 :::
+
+## 11. js 高阶函数? 函数柯里化？
+
+::: danger 函数的本质
+_对流程的封装，使其具有通用性_
+:::
+先看一个普通的例子，createMap()作用是把数组的每一项翻指定的倍数
+
+```js
+const arr1 = [1, 2, 3, 6]
+
+function createMap(arr, rate) {
+	const newArr = []
+	arr.forEach(item => {
+		newArr.push(item * rate)
+	})
+
+	return newArr
+}
+
+console.log(createMap(arr1, 2))
+// [ 2, 4, 6, 12 ]
+```
+
+假如需要把数组的每一项转换成指定的格式，比如{ name: name[item] }，显然 rate 不适用
+
+<h1 align="center">↓</h1>
+
+```js{4}
+function createMap(arr, mapper) {
+	const newArr = []
+	arr.forEach(item => {
+		newArr.push(mapper(item))
+	})
+
+	return newArr
+}
+
+console.log(createMap(arr1, n => n * 2)) // [ 2, 4, 6, 12 ]
+console.log(createMap(arr1, n => ({ name: `name${n}` })))
+// [
+//   { name: 'name1' },
+//   { name: 'name2' },
+//   { name: 'name3' },
+//   { name: 'name6' }
+// ]
+```
+
+<h1 align="center">↓</h1>
+<h4 align="center">函数柯里化写法</h4>
+
+```js{2-8}
+function createMap(arr) {
+	return function (mapper) {
+		const newArr = []
+		arr.forEach(item => {
+			newArr.push(mapper(item))
+		})
+
+		return newArr
+	}
+}
+
+const newArr = createMap(arr1)(n => ({ id: n }))
+console.log(newArr) // [ { id: 1 }, { id: 2 }, { id: 3 }, { id: 6 } ]
+```
+
+**柯里化是一种将使用多个参数的一个函数转换成一系列使用一个参数的函数的技术**
+::: warning 实现思路
+判断当前传入函数的参数个数 (args.length) 是否大于等于原函数所需参数个数 (fn.length) ，如果是，则执行当前函数；如果是小于，则返回一个函数  
+:::
+
+```js
+function curry(fn, ...args) {
+	return args.length >= fn.length ? fn(...args) : (..._args) => curry(fn, ...args, ..._args)
+}
+```
+
+::: tip 函数柯里化的优点
+
+&emsp;&emsp;函数更加灵活和可重用。通过柯里化，可以将一个多参数的函数转换为一系列单参数的函数，使函数更加灵活和可重用  
+&emsp;&emsp;可以避免重复的代码。通过柯里化，可以避免在调用函数时重复地传递参数，从而避免了重复的代码
+:::
+
+::: tip 函数柯里化的缺点
+
+&emsp;&emsp;可能会降低性能。通过柯里化，函数的性能可能会降低，因为需要额外的内存来存储函数的返回值和参数  
+&emsp;&emsp;可能会增加代码复杂度。通过柯里化，可能会增加代码的复杂度，因为需要处理额外的参数和函数返回值
+:::

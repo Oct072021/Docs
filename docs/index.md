@@ -4,8 +4,8 @@ title: create-docs
 titleTemplate: An easy way to generate a static site
 hero:
   name: create-docs
-  text: An easy way to generate a static site
-  tagline: My great project tagline
+  text: Note Some Common Problems
+  tagline: for interview && project
   image:
     src: /logo-large.webp
     alt: logo
@@ -13,17 +13,14 @@ hero:
     - theme: brand
       text: Get Started
       link: ./zh/js/
-    - theme: alt
-      text: VitePress Guide
-      link: https://vitepress.dev
 features:
   - icon: 🔥
     title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+    details: Personal Project Preview
   - icon: 💡
     title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+    details: Interview's problem
   - icon: 🚀
     title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+    details: Data Structure && Algorithm
 ---

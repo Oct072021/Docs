@@ -107,6 +107,75 @@ sessionStorage 可以进行跨标签通信，但存在一定的局限
 在 A 页面已经打开的前提下，然后在 tab 打开同域 C 页面，此时 A 和 C 无直接关系，因此不属于一个会话  
 :::
 
-因此，session 并不是共享的，而是**复制**的  
+因此，session 并不是共享的，而是**复制**的
 
 总结来说，B 页面打开的时候复制了 A 页面的 session(可以理解为深拷贝)，因此二者相互独立，互不影响
+
+## 8. 单点登录
+
+实际上就是**业务的抽离**，产品线很多的情况下，可以把用户系统抽离出来，形成一个**认证中心**。  
+如此一来，对用户信息的所有操作，都在此认证中心完成
+
+技术实现一般为两种：_Session + Cookie_ 模式 && _Token_ 模式 && _Token + RefreshToken_ 模式
+::: warning Session + Cookie
+<img src="/session+cookie.png" />
+
+① 登录，向认证中心验证  
+② 验证成功后，认证中心往 _Session_ 表格中记录(**key：sid，value：info**)  
+③ 以 _Cookie_ 形式返回**sid**，即保存在用户浏览器的 _Cookie_ 中  
+④ 访问子系统时，把此 **sid** 一同带给子系统  
+⑤ 子系统把 **sid** 发给认证中心，认证中心在 _Session_ 表中查询是否存在相应数据  
+⑥ 存在结果则校验通过，反之失败
+
+::: danger 分析
+
+<div style="display: flex; align-items: center;">
+  <span style="width: 80px;font-weight: 600;">优势 => </span>
+  <span>由于所有系统都需要通过认证中心进行校验，因此认证中心具有非常强的控制力，只需在认证中心操作，即可实现对所有子系统用户的控制</span>
+</div>
+<div style="display: flex; align-items: center;">
+  <span style="width: 55px;font-weight: 600;">劣势 => </span>
+  <span>
+    1)费用较高，总用户量或某个子系统的用户量爆发性增大，都需要对认证中心进行扩容<br>
+    2)容错较低，如果认证中心挂掉，所有子系统都会受影响
+  </span>
+</div>
+:::
+
+::: warning Token
+<img src="/token.jpg" />
+
+① 登录，向认证中心验证  
+② 认证成功后，返回 Token  
+③ 用户存入 Token，并带着 Token 访问子系统  
+④ 子系统通过特定的方式(秘钥、特定的加解密算法)验证 Token
+
+::: danger 分析
+
+<div style="display: flex; align-items: center;">
+  <span style="width: 55px;font-weight: 600;">优势 => </span>
+  <span>成本较低，认证中心只负责登录操作，不受任何子系统用户量的影响</span>
+</div>
+<div style="display: flex; align-items: center;">
+  <span style="width: 55px;font-weight: 600;">劣势 => </span>
+  <span>认证中心作用有限，除了登录操作，无法对用户进行任何操作，即失去了对用户的控制</span>
+</div>
+:::
+
+<h1 align="center">↓ 优化</h1>
+
+::: warning 双 Token
+<img src="/double_token.jpg" />
+
+① 登录，向认证中心验证  
+② 认证成功后，返回 Token 和 RefreshToken  
+&emsp;(Token 为访问子系统时所携带的，即所有子系统都认识，过期时间较短；RefreshToken 只有认证中心认识，过期时间较长)  
+③ 用户存入 Token，并带着 Token 访问子系统  
+④ 子系统通过特定的方式(秘钥、特定的加解密算法)验证 Token  
+⑤ 若 Token 失效，则子系统提醒用户，用户则带着 RefreshToken 再次请求认证中心，返回新的 Token，然后执行步骤 ③
+
+::: danger 分析
+结合了 _Session + Cookie_ 模式 和 普通 _Token_ 模式，既能实现认证中心对用户的控制，也有效控制了成本  
+算是一种折中的方案
+
+:::

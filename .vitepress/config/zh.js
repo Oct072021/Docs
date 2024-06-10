@@ -3,11 +3,9 @@
  */
 const sidebar = {
 	'/zh': [
-    {
+		{
 			text: '项目',
-			items: [
-				{ text: 'Link', link: '/zh/show/' },
-			]
+			items: [{ text: 'Link', link: '/zh/show/' }]
 		},
 		{
 			text: '八股文',

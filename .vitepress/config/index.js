@@ -44,8 +44,8 @@ export default defineConfig({
 	title: 'create-docs',
 	description: 'Quickly generate a static site with VitePress.',
 	head: [
-		['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
-		['link', { rel: 'icon', href: '/favicon.png', type: 'image/png ' }]
+		['link', { rel: 'icon', href: './favicon.svg', type: 'image/svg+xml' }],
+		['link', { rel: 'icon', href: './favicon.png', type: 'image/png ' }]
 	],
 	srcDir: 'docs',
 	lastUpdated: true,

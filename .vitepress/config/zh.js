@@ -15,6 +15,13 @@ const sidebar = {
 				{ text: '原理', link: '/zh/theory/' },
 				{ text: '优化手段', link: '/zh/optimization/' }
 			]
+		},
+    {
+			text: '数据结构',
+			items: [
+				{ text: '栈 Stack', link: '/zh/DataStructure/stack' },
+        { text: '队列 Queue', link: '/zh/DataStructure/queue' },
+			]
 		}
 	]
 }

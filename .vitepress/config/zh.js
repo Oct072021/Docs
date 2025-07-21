@@ -19,8 +19,12 @@ const sidebar = {
     {
 			text: '数据结构',
 			items: [
-				{ text: '栈 Stack', link: '/zh/DataStructure/stack' },
-        { text: '队列 Queue', link: '/zh/DataStructure/queue' },
+				{ text: '栈 Stack', link: '/zh/DataStructure/Stack' },
+        { text: '队列 Queue', link: '/zh/DataStructure/Queue' },
+        { text: '双端队列 Deque', link: '/zh/DataStructure/Deque' },
+        { text: '单链表 LinkedList', link: '/zh/DataStructure/LinkedList' },
+        { text: '双链表 DoublyLinkedList', link: '/zh/DataStructure/DoublyLinkedList' },
+        { text: '循环链表 CycleLinkedList', link: '/zh/DataStructure/CycleLinkedList' },
 			]
 		}
 	]

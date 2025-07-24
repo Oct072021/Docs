@@ -10,6 +10,7 @@ const sidebar = {
 		{
 			text: '八股文',
 			items: [
+				{ text: 'HTML', link: '/zh/html/' },
 				{ text: 'JS && TS', link: '/zh/js/' },
 				{ text: 'Vue ', link: '/zh/vue/' },
 				{ text: '原理', link: '/zh/theory/' },

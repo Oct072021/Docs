@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: 快速开始
-      link: ./js/
+      link: ./interview/js
 features:
   - icon: 🔥
     title: 分支 A

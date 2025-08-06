@@ -34,7 +34,7 @@
 
 ### ① 基础数据类型
 
-​ number、string、boolean、null、undefined、symbol、binInt
+ number、string、boolean、null、undefined、symbol、binInt
 
 ::: tip tips1
 
@@ -70,7 +70,7 @@
 
 ### ② 引用数据类型
 
-​ object，像 array、function、regxp 都属于 object
+ object，像 array、function、regxp 都属于 object
 
 ::: tip
 
@@ -123,7 +123,7 @@ if(a == 1 && a == 2 && a == 3){
 
 ::: tip
 
-```
+```js
 var a = {
  i: 1,
  valueOf() {
@@ -370,7 +370,7 @@ console.log(createMap(arr1, 2))
 
 <h1 align="center">↓</h1>
 
-```js{4}
+```js
 function createMap(arr, mapper) {
 	const newArr = []
 	arr.forEach(item => {
@@ -393,7 +393,7 @@ console.log(createMap(arr1, n => ({ name: `name${n}` })))
 <h1 align="center">↓</h1>
 <h4 align="center">函数柯里化写法</h4>
 
-```js{2-8}
+```js
 function createMap(arr) {
 	return function (mapper) {
 		const newArr = []
@@ -431,3 +431,29 @@ function curry(fn, ...args) {
 &emsp;&emsp;可能会降低性能。通过柯里化，函数的性能可能会降低，因为需要额外的内存来存储函数的返回值和参数  
 &emsp;&emsp;可能会增加代码复杂度。通过柯里化，可能会增加代码的复杂度，因为需要处理额外的参数和函数返回值
 :::
+
+
+
+## 12. JS数组去重
+
+```js
+// 数字或字符串数组去重，效率高
+function unique(arr) {
+    var result = {}; // 利用对象属性名的唯一性来保证不重复
+    for (var i = 0; i < arr.length; i++) {
+        if (!result[arr[i]]) {
+            result[arr[i]] = true;
+        }
+    }
+    return Object.keys(result); // 获取对象所有属性名的数组
+}
+
+// 利用ES6的Set去重，适配范围广，效率一般，书写简单
+function unique(arr) {
+    return [...new Set(arr)]
+}
+
+// 花活
+const uniqueArr= (arr) => arr.reduce((prev, cur) => prev.includes(cur) ? prev : [...prev, cur], []);
+```
+

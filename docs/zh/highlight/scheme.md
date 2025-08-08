@@ -1,63 +1,129 @@
-# 1. 对 html 语义化的理解
+## 1. 控制最大并发请求数，同时控制并发任务的执行顺序
 
-主要为以下 4 点
+基于技术栈：Axios
 
-::: tip
-① 去掉或丢失样式的时候能够让页面呈现出清晰的结构
+### **_问题一：控制最大并发请求数_**
 
-② 有利于 SEO: 和搜索引擎建立良好的沟通，有助于爬虫获取更多的有效信息（爬虫依赖于标签来确定上下文和各个关键字的权重）
+> **问题背景**
+>
+> 1. 批量发送网络请求，若全量发送，则会给服务端造成压力
+>
+> **解决思路**：基于**浏览器异步的任务队列**方案，通过 JS/TS 模拟一个**任务队列**，达到暂时拦截请求的目的
+>
+> **过程表述**
+>
+> 首先，浏览器自身就拥有最大并发数的控制，数量是6，但基于现实情况，可能想把这个数量改为3
+>
+> 具体做法是，在封装axios的模块中，定义3个变量
+>
+> - 常量maxConcurrent：要设置的最大并发数
+> - 变量concurrentRequests：当前的并发请求数
+> - 数组requestQueue：请求队列
+>
+> 在请求拦截器中，判断 当前请求数 是否小于 最大并发数
+>
+> - 若小于，则代表还未到达最大并发数，此时 当前请求数+1 ，同时放行请求，即return config
+> - 若等于，则代表已达到最大并发数，此时需要暂时拦截，使用Promise把请求包装成异步回调，加入到自定义的请求队列中
+>
+> ```ts
+> service.interceptors.request.use(
+>   (config: InternalAxiosRequestConfig) => {
+>     if (concurrentRequests < maxConcurrent) {
+>       concurrentRequests++
+> 
+>       return config
+>     } else {
+>       return new Promise((resolve) => {
+>         requestQueue.push({ config, resolve })
+>       })
+>     }
+>   }
+> )
+> ```
+>
+> 在请求拦截器中，当前请求数-1
+>
+> 然后判断，自定义的请求队列中是否存在任务，即 requestQueue.length > 0
+>
+> - 若存在，则通过shift方法取出第一个任务，使用Promise的resolve方法执行
+>
+> ```ts
+> service.interceptors.response.use(
+>   async (response: AxiosResponse) => {
+>     const { config, data } = response
+>     const { code, message } = data
+> 
+>     concurrentRequests--
+>     if (requestQueue.length > 0) {
+>       const { config, resolve } = requestQueue.shift()
+>       concurrentRequests++
+>       resolve(config)
+>     }
+> 
+>     return data
+>   }
+> )
+> ```
 
-③ 方便其他设备解析（如屏幕阅读器、盲人阅读器、移动设备），以意义的方式来渲染网页
+### 问题二：控制并发任务的执行顺序
 
-④ 便于团队的开发和维护，语义化更具可读性
+**_问题二：相对路径引入 CDN，即与当前域名一致_**
 
-:::
-
-# 2. SEO 优化手段
-
-::: tip 内部优化
-① 合理的 TDK
-
-1) _title_：浏览器上显示的那些内容，不仅用户能看到，也能被搜索引擎检索到，搜索引擎在抓取网页时，最先读取的就是网页标题，所以 _title_ 是否正确设置极其重要。_title_ 一般不超过 _80_ 个字符，而且词语间要用英文 “-” 隔开，因为计算机只对英语的敏感性较高，对汉语的敏感性不高。
-
-2. _description_：也就是网页的内容摘要，这是对于一个网页的简要内容概况。_description_ 一般不超过 _150_ 个字符，描述内容要和页面内容相关。
-
-3) _keywords_：主要作用是告诉搜索引擎本页内容是围绕哪些词展开的。因此 _keywords_ 的每个词都要能在内容中找到相应匹配，才有利于排名。_keywords_ 一般不超过 _3_ 个，每个关键词不宜过长，而且词语间要用英文 “,” 隔开，尽量将重要的关键字靠前放。
-
-② 语义化的 _HTML_ 代码，符合 _W3C_ 规范
-
-​ 语义化代码能够让搜索引擎容易理解网页，即使脱去了 _CSS_ 这一层外衣，整个网页的结构也是清清楚楚的，无论是搜索引擎还是阅读者，都能够很容易的分辨网页的结构
-
-③ 非装饰性图片必须加 _alt_
-
-​ _img_ 标签的 _alt_ 属性指定了替代文本，用于在图像无法显示或者用户禁用图像显示时，代替图像显示在浏览器中的内容
-
-④ 对于不显示的对象谨慎使用 _display:none_
-
-​ 对于不想显示的文字内容，应当设置 _z-index_ 或设置到浏览器显示器之外。因为搜索引擎会过滤掉 _display:none_ 其中的内容
-
-⑤ 重要内容 _HTML_ 代码放在最前
-
-​ 索引擎抓取 _HTML_ 顺序是从上到下，所以我们尽量将重要的内容放在前面，保证重要内容一定会被抓取。
-
-⑥ 少用 _iframe_
-
-​ 少用或者尽量不用 _iframe_，因为搜索引擎不会抓取 _iframe_ 中的内容
-
-:::
-
-::: tip 外部优化
-① 投放友情链接和外链  
-② 砸钱
-
-:::
-
-# 3. a 元素的作用
-
-<! href 属性中的 _url_ 可以是浏览器支持的任何协议，所以 _a_ 可以用于  
-手机拨号 \<a 发送短信 href='tel:10086'>10086  
-发送短信 \<a href="sms:10086?body=test"> 等 
-
-当然，_a_ 元素最常见的两个应用就是做锚点和下载文件
-
-锚点可以在点击时快速定位到一个页面的某一个位置，而下载的原理在于 _a_ 标签所对应的资源浏览器无法解析，于是浏览器会选择将其下载下来
+> **问题背景**
+>
+> 1. 由于业务需要，生产环境的 CDN 地址与前端代码部署的地址一致，因此要利用浏览器的自动补全 url 机制，实现 cdn 的相对路径引入，且开发环境（本机地址）不受影响
+>
+> **解决思路**：开发环境不受影响，意味着别名的路径指向不能变更，因此需要修改打包产物
+>
+> **过程表述**
+>
+> 首先，手动修改打包产物是一个万能且简单的方案，无论是 VSCODE 还是其他编辑器，都有提供批量替换的功能。但是这种方案存在着一些缺点，比如：操作繁琐，每一次打包都需要手动执行一次替换操作；又比如：不利于 CI/CD 流程
+>
+> **问题背景**
+>
+> 1. 进入系统之前，需要请求n个接口（n >= 3)，同时页面也有不定量的接口，那么这n个接口可能会堵塞页面的接口，造成页面渲染时间变长
+>
+> **解决思路**：基于上述的自定义队列方案，控制加入数组的方式，即**头插和尾插**
+>
+> **过程表述**
+>
+> - 拓展axios类型，加入isFirst配置，代表是否需要优先执行，默认值为true
+>
+>   ```ts
+>   declare module 'axios' {
+>     export interface AxiosRequestConfig {
+>       isFirst?: boolean
+>     }
+>   }
+>   
+>   const service = axios.create({
+>     baseURL: import.meta.env.VITE_API_BASE_URL,
+>     timeout: 10000,
+>     isFirst: true,
+>     headers: {
+>       'Content-Type': 'application/json',
+>     },
+>   })
+>   ```
+>
+> - 判断isFirst：为true，则头插；为false，则尾插
+>
+>   ```ts
+>   service.interceptors.request.use(
+>     (config: InternalAxiosRequestConfig) => {
+>       if (concurrentRequests < maxConcurrent) {
+>         concurrentRequests++
+>   
+>         return config
+>       } else {
+>         return new Promise((resolve) => {
+>           if (config.isFirst) {
+>             requestQueue.unshift({ config, resolve })
+>           } else {
+>             requestQueue.push({ config, resolve })
+>           }
+>         })
+>       }
+>     }
+>   )
+>   ```

@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: .zh//interview/js
+      link: zh/interview/js
 features:
   - icon: 🔥
     title: Feature A
